@@ -14,3 +14,9 @@
 *  [gettimeofday()-2](http://blog.csdn.net/tigerjibo/article/details/7039434)
 *  [網路單位詳解](http://www.spring.url.tw/internet/internet_06.html)
 *  [AF_INET 與 PF_INET的差異](http://spyker729.blogspot.tw/2010/07/afinetpfinet.html)
+
+## How to use:
+1.	Compile appServer.c & appClient.c
+2. Run appServer.out
+3. Run appClient.out
+4. 	Than you will see the result.
