@@ -17,6 +17,14 @@
 
 ## How to use:
 1.	Compile appServer.c & appClient.c
-2. Run appServer.out
+    
+    	gcc appServer.c -o Server.out
+    	gcc appClient.c -o Client.out
+
+2. Run Server.out
+	
+		./Server.out		 		
 3. Run appClient.out
-4. 	Than you will see the result.
+
+		./Client.out
+4. 	Then you will see the result.
