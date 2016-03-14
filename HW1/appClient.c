@@ -54,11 +54,11 @@ int main(int argc, char *argv[]){
   }
 
   // 填寫sockaddr_in
-  // 將&address清空
+  // 把一段記憶體區的內容全部設置為0
   bzero(&address, sizeof(address));
   address.sin_family = AF_INET;
   address.sin_port = htons(Server_PortNumber);
-  // inet_addr:將IPv4的Address轉成binary code
+  // inet_addr:將IPv4字串型態的Address轉成網路字節順序的型態
   address.sin_addr.s_addr = inet_addr(Server_Address);
   // inet_ntoa:將binary code轉成IPv4的Address
   printf("Server IP: %s\n",inet_ntoa(address.sin_addr));

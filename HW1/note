@@ -1,0 +1,112 @@
+p1.
+    各位同學好，今天要出第一次作業，題目是「Socket Programming With UDP」
+
+
+p2.
+    這是Outline，首先我們先來看一下Socket
+
+P3.
+    socket是由California的柏克萊大學所設計出來用在Unix系統上的system call
+
+    現今幾乎所有的作業系統都支援Berkeley socket interface
+
+    socket允許兩台端點或者是兩個processes在同一台電腦上相互溝通
+
+P4.
+    Socket是一個介於應用層與TCP/IP協議通信的中間軟體抽象層,它是一組介面。它把複雜的TCP/IP協議隱藏在Socket介面之後,對使用者來說，只要使用者使用這組介面，讓Socket去組織數據，以符合指定的協議。
+
+P5.
+    接下來是介紹Socket的類型，在圖中有四種類型，今天要介紹的是DGRAM這個類型，其他的類型會在之後的作業中講解。DGRAM這個類型就是代表要使用UDP的方式來實作，那UDP是「非連線型傳輸協定」，簡單來說就是「傳送後即放置不管」，無法執行重送、不能保證傳送的資料是否送到目的地，此外，收信方無法保證被送來的封包是否有按照順序傳送。
+
+P6.
+    接著，介紹Socket API的部分
+
+P7.
+    首先我們來看資料接收端(Server)與傳送端(Client)的流程架構圖，在Server端我們會先建立一個Socket的服務，接著在socket標上名稱，也就是bind這個function，等等會更詳細的介紹它，然後就要開始接收訊息。
+
+    在Client的部分一開始也是建立Socket的服務，然後我們就可以傳送訊息了。我們可以看到傳送了Datagram到了Server去，Server就會接收它並且處理這筆Datagram，處理完之後再傳送訊息回給Client端。
+
+P8.
+    為了使用Socket，所以要調用Socket函數，這個函數會回傳一個類似文件描述符的控制碼。
+
+    首先我們來看到domain這個參數，他表示的是socket使用的address體系。
+    PF_UNIX是區域的process間通訊用的socket。
+    PF_INET是IPv4的socket
+    PF_INET6是IPv6的socket
+
+    接著看到type這個參數，他表示的是socket的特質。
+
+    最後是protocol，表示協定。通常都會使用預設值0，它代表的是可利用的協定會依照domain以及type的組合去決定。
+
+P9.
+    PF代表的是internet protocol家族，而AF則是代表internet adderss家族的相關協定
+    理論上來說，我們在建立一個socket時，應該要使用PF_xxxx，就是前一張投一片那個domain參數。
+    而AF_xxxx則是用在socket address structures，等等會介紹這個stucture。
+
+    但是因為PF與AF協定的內容是一樣的，所以很多書上都會混用，也不會有甚麼影響。
+
+P10.
+    接著我們來看幾個會用到的function
+
+    首先是htons()這個function
+    它的功能是將無號短整數(0~65536)從主機位元組序轉換成網路位元組序。
+    那為甚麼要做這一步呢?主要是因為不同的CPU有不同的字節順序，最常見的有兩種，
+    第一種:Little endian(LSB)
+    第二種:Big endian(MSB)
+    網路字節順序是TCP/IP中規定好的一種數據表示格式，它與具體的CPU類型、操作系統無關，從而保證數據能在不同主機間傳輸時能夠被解釋。
+    網路字節採用的是Big endian排序方式。
+
+P11.
+    再來我們看到bzero()這個function
+    它的功能是將字串的前n個字節歸零。也就是清空的動作。
+
+    inet_addr()這個function的功能是將IPv4字串型態的Address轉成網路字節順序的型態。
+
+P12.
+    bind()這個function是給定Socket一個名稱。它會繫結所建立的socket到指定的網路介面和明確的表示所接受的port number，也就是IP和port。
+    若不使用bind()則會由kernal來自動分配尚未被使用到的port number，所以每次啟動server時，這個process對應到的port number都會不同。
+
+P13.
+    接著看到IPv4 Address Structure
+
+    首先，每一個協議族群都會定義自己的結構體
+
+    這些結構體都以sockaddr_然後再以各自的後綴做結尾。
+
+    例如一個IPv4的結構體就是以in做結尾，而IPv6的結構體就是以in6做結尾。
+    在這個結構體內宣告了一些變數:
+        有結構體的長度，固定16Bytes
+        Address_family，因為是IPv4所以要使用AF_INET
+        Port number
+        Internet address
+        及最後一個sin_zero[8]，它的功用則是為了要使這個結構體與sockaddr這個structure大小相等。
+    那為甚麼我們需要使用sockaddr_in這個結構體呢?
+    其實從它的變數就可以知道它是用來指定與通訊端連接的本機或遠端端點位址。
+
+P14.
+    接著我們來看另一個結構體sockaddr
+    它定義了兩個變數:
+        Address_family:與sockaddr_in的值是一樣的
+        sa_data[14]:存放IP、Port number用的
+    它與sockaddr_in的差異就在於，sockaddr_in是給人使用的，他把sa_data[14]分解成sin_port, sin_addr和sin_zero。
+    而sockaddr則是給系統用的。
+    在大部分的用法裡，會先宣告結構體sockaddr_in，接著指定完所有資訊後，會強制轉換成sockaddr，將資料存在sockaddr結構體內，以供系統使用。
+
+P15.
+    這是一張sockaddr protocol suite的比較圖，若有興趣的可以自行去查相關資料，這邊就不多接紹。
+
+P16.
+    recvfrom()這個function是用來接收遠端主機經指定的socket傳來的數據，並把數據存到由參數buffer指向的內存空間，sizeof(buffer)為可接受數據的最大長度，也就是我們的buffer長度，flags預設為0，就是沒有特別的用途，struct sockaddr*，這可以讓你知道資料來自何處，並將 struct sockaddr 的長度填入address_length。
+
+    sendto()用在免連線的 UDP SOCK_DGRAM socket。對於免連線 sockets，你每次都必須指定封包的目地，而這就是為什麼 sendto() 的最後一個參數需要定義封包的目地。
+    sd 參數是 socket、buffer 是指向要傳送資料的指標、message_length是你想要傳送的資料量、而 flags 讓你可以指定更多資訊，決定要如何傳送資料。如果你只是想要送一般的資料，可以將 flags 設定為零
+
+
+
+P17.
+    close()這個function就如字面上的意思，當操作結束後，可以使用它來釋放socket，從而停止在該socket上的任何數據操作。
+
+
+
+
+
