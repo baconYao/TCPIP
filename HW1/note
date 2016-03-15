@@ -106,6 +106,43 @@ P16.
 P17.
     close()這個function就如字面上的意思，當操作結束後，可以使用它來釋放socket，從而停止在該socket上的任何數據操作。
 
+P18.
+    接著我們來看一些範例。
+
+P19.
+    在Client端方面:
+
+    首先，要使用socket就必須要include相關的system call及一些libary。
+    接著，我們宣告了port number和IP address。
+    再來就是宣告structure sockaddr_in和一些會用到的變數。
+    buffer就是我們要傳送的內容。
+
+P20.
+    接著來看到灰色框框，我們將socket()相關訊息填好後指定給一剛剛宣告好的變數，接著判斷sock變數回傳的值，若是成功，則回傳1，失敗則回傳-1。
+
+    再來看到藍色框框，使用bzero()將宣告的結構體初始化，並且將必要的訊息賦予相對應的結構變數內。
+
+    之後來看綠色框框，我們使用sendto()這個函數將我們的資料傳送到指定的Server端去，最後檢查傳回來的數值，若是-1，則代表沒有傳送成功。
+
+    最後，要記得釋放socket。
+
+P21.
+    接下來是Server端的部分:
+
+    黃色框框跟Client端一樣都是要先include需要用到的library，然後指定一個port number。
+
+    
+
+
+
+
+
+
+
+
+
+
+
 
 
 
