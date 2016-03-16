@@ -60,7 +60,7 @@ P11.
     再來我們看到bzero()這個function
     它的功能是將字串的前n個字元歸零。也就是清空的動作。
 
-    inet_addr()這個function的功能是將IPv4字串型態的Address轉成網路字節順序位元組序的型態。
+    inet_addr()這個function的功能是將IPv4字串型態的Address轉成網路位元組序的型態。
 
 P12.
     bind()這個function是給定Socket一個名稱。它會繫結所建立的socket到指定的網路介面和明確的表示所接受的port number，也就是IP和port。
@@ -93,12 +93,12 @@ P14.
     在大部分的用法裡，會先宣告結構體sockaddr_in，接著指定完所有資訊後，會強制轉換成sockaddr，將資料存在sockaddr結構體內，以供系統使用。
 
 P15.
-    這是一張sockaddr protocol suite的比較圖，若有興趣的可以自行去查相關資料，這邊就不多接紹。
+    這是一張sockaddr protocol suite的比較圖，若有興趣的可以自行去查相關資料，這邊就不多介紹。
 
 P16.
     recvfrom()這個function是用來接收遠端主機經指定的socket傳來的數據，並把數據存到由參數buffer指向的內存空間，sizeof(buffer)為可接受數據的最大長度，也就是我們的buffer長度，flags預設為0，就是沒有特別的用途，struct sockaddr*，這可以讓你知道資料來自何處，並將 struct sockaddr 的長度填入address_length。
 
-    sendto()用在免連線的 UDP SOCK_DGRAM socket。對於免連線 sockets，你每次都必須指定封包的目地，而這就是為什麼 sendto() 的最後一個參數需要定義封包的目地。
+    sendto()用在免連線的 UDP SOCK_DGRAM socket。對於免連線 sockets，你每次都必須指定封包的目地，而這就是為什麼 sendto() 的有一個參數需要定義封包的目地。
     sd 參數是 socket、buffer 是指向要傳送資料的指標、message_length是你想要傳送的資料量、而 flags 讓你可以指定更多資訊，決定要如何傳送資料。如果你只是想要送一般的資料，可以將 flags 設定為零
 
 
