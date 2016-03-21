@@ -40,6 +40,7 @@ int main(int argc, char *argv[]){
   int sock,byte_sent,address_length = sizeof(address);
   // 欲傳送的內容
   char buffer[6] = "hello\0";
+  // printf("%d\n",sizeof(buffer) );
   // 送資料的數量
   int dataCount = 0;
   // int tt = sizeof(buffer);
@@ -69,13 +70,14 @@ int main(int argc, char *argv[]){
       // sendto() 用来將數據由指定的socket傳給對方主機
       byte_sent = sendto(sock, buffer, sizeof(buffer), 0, (struct sockaddr*)&address, address_length);
       dataCount++;
+      gettimeofday(&end,NULL);
       // 傳送不成功
       if(byte_sent < 0) {
           printf("Error sending packet\n");
       }
-      gettimeofday(&end,NULL);
+      
       timeUse = (end.tv_sec-start.tv_sec)+(end.tv_usec-start.tv_usec);//微秒
-  }while(timeUse < 1000);   //執行0.001秒
+  }while(timeUse < 3000);   //執行0.001秒
 
   // 結束訊息
   int sent_complete;
