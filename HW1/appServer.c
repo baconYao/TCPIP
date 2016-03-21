@@ -48,7 +48,9 @@ int main(int argc, char *argv[]){
 
   bzero(&address, sizeof(address));
   address.sin_family = AF_INET;
+  // 如果 = 0，則代表自動分配port number
   address.sin_port = htons(PortNumber);
+  // 自動填入本機位址
   address.sin_addr.s_addr = INADDR_ANY;
 
   // bind():給訂socket一個名稱
