@@ -1,0 +1,206 @@
+p1.
+    各位同學好，今天要出第次作業，題目是「Socket Programming With UDP」
+
+
+p2.
+    這是Outline，首先我們先來看一下Socket
+
+P3.
+    socket是由California的柏克萊大學所設計出來用在Unix系統上的system call
+
+    現今幾乎所有的作業系統都支援Berkeley socket interface
+
+    socket允許兩台端點或者是兩個processes在同一台電腦上相互溝通
+
+P4.
+    Socket是一個介於應用層與TCP/IP協議通信的中間軟體抽象層,它是一組介面。它把複雜的TCP/IP協議隱藏在Socket介面之後,對使用者來說，只要使用者使用這組介面，讓Socket去組織數據，以符合指定的協議。
+
+P5.
+    接下來是介紹Socket的類型，在圖中有四種類型，今天要介紹的是STREAM這個類型，其他的類型會在之後的作業中講解。STREAM這個類型就是代表要使用TCP的方式來實作，那TCP是「連線型傳輸協定」。具有「資料確認與重送」、「流量控制」等特性。
+
+P6.
+    接著，介紹Socket API的部分
+
+P7.
+    首先我們來看資料接收端(Server)與傳送端(Client)的流程架構圖，這次在server的部分多了listen()、accept()這些function，並且將之前的recvfrom()和sendto()這兩個function改成recv()和send()這兩個function。
+
+    在client的部分則多了connect()這個function，這些function等等都會介紹到。
+
+    這裡要介紹的是「Three Way Handshake」這個機制。
+
+P8. 
+    「Three Way Handshake」中文就是 「三向交握」。
+    由於TCP是一個連線導向的傳輸協定，所以在彼此傳輸資料前會經過一個連線「交握」的動作，也就是先透過此交握動作，彼此達到協商以及交換資訊的目的。
+
+P9.
+    為了使用Socket，所以要調用Socket函數，這個函數會回傳一個類似文件描述符的控制碼。
+
+    首先我們來看到domain這個參數，他表示的是socket使用的address體系。
+    PF_UNIX是區域的process間通訊用的socket。
+    PF_INET是IPv4的socket
+    PF_INET6是IPv6的socket
+
+    接著看到type這個參數，他表示的是socket的特質。
+
+    最後是protocol，表示協定。通常都會使用預設值0，它代表的是可利用的協定會依照domain以及type的組合去決定。
+
+P10.
+    PF代表的是internet protocol家族，而AF則是代表internet adderss家族的相關協定
+    理論上來說，我們在建立一個socket時，應該要使用PF_xxxx，就是前一張投一片那個domain參數。
+    而AF_xxxx則是用在socket address structures，等等會介紹這個stucture。
+
+    但是因為PF與AF協定的內容是一樣的，所以很多書上都會混用，也不會有甚麼影響。
+
+P11.
+    接著我們來看幾個會用到的function
+
+    首先是htons()這個function
+    它的功能是將無號短整數(0~65536)從主機位元組序轉換成網路位元組序。
+    那為甚麼要做這一步呢?主要是因為不同的CPU有不同的位元組序，最常見的有兩種，
+    第一種:Little endian(LSB)
+    第二種:Big endian(MSB)
+    網路位元組序是TCP/IP中規定好的一種數據表示格式，它與具體的CPU類型、操作系統無關，從而保證數據能在不同主機間傳輸時能夠被解釋。
+    網路位元組序採用的是Big endian排序方式。
+
+P12.
+    再來我們看到bzero()這個function
+    它的功能是將字串的前n個字元歸零。也就是清空的動作。
+
+    inet_addr()這個function的功能是將IPv4字串型態的Address轉成網路位元組序的型態。
+
+P13.
+    bind()這個function是給定Socket一個名稱。它會繫結所建立的socket到指定的網路介面和明確的表示所接受的port number，也就是IP和port。
+    若不使用bind()則會由kernal來自動分配尚未被使用到的port number，所以每次啟動server時，這個process對應到的port number都會不同。
+
+P14.
+    接著看到IPv4 Address Structure
+
+    首先，每一個協議族群都會定義自己的結構體
+
+    這些結構體都以sockaddr_然後再以各自的後綴做結尾。
+
+    例如一個IPv4的結構體就是以in做結尾，而IPv6的結構體就是以in6做結尾。
+    在這個結構體內宣告了一些變數:
+        有結構體的長度，固定16Bytes
+        Address_family，因為是IPv4所以要使用AF_INET
+        Port number
+        Internet address
+        及最後一個sin_zero[8]，它的功用則是為了要使這個結構體與sockaddr這個structure大小相等。
+    那為甚麼我們需要使用sockaddr_in這個結構體呢?
+    其實從它的變數就可以知道它是用來指定與通訊端連接的本機或遠端端點位址。
+
+P15.
+    接著我們來看另一個結構體sockaddr
+    它定義了兩個變數:
+        Address_family:與sockaddr_in的值是一樣的
+        sa_data[14]:存放IP、Port number用的
+    它與sockaddr_in的差異就在於，sockaddr_in是給人使用的，他把sa_data[14]分解成sin_port, sin_addr和sin_zero。
+    而sockaddr則是給系統用的。
+    在大部分的用法裡，會先宣告結構體sockaddr_in，接著指定完所有資訊後，會強制轉換成sockaddr，將資料存在sockaddr結構體內，以供系統使用。
+
+P16.
+    這是一張sockaddr protocol suite的比較圖，若有興趣的可以自行去查相關資料，這邊就不多介紹。
+
+P17.
+    listen這個函數是用來通知OS/network socketfd的socket已經可以接受建立連線，將等待連線的passive socket放進一個佇列內等待。
+
+    參數backlog是用來指定同時能處理的最大連接要求，透過這個參數可以知道，開始執行listen()時可以接受來自用戶端的TCP連線。
+    
+    Listen()並未開始接收連線，只是設置socket為listen模式，真正接收client端連線的是accept()。
+
+P18.
+    在這張流程圖裡，可以看到兩個queue，一個是「已完成連線」的queue，另一個則是「未完成連線」的queue。
+    使用listen這個function會將一個尚未連線的socket放進「未完成連線」的queue內，透過「交握」的方式建立連線後，將socket搬移到「已完成連線」的queue，等待被accept函數使用。
+
+P19.
+
+    accept()這個function是由server端使用，其功用是將前頁投影片裡的「已完成連線」的queue內的socket傳到使用者的應用程式。
+
+    connect()這個function是由client端使用，其功用是透過3-way-handshake與server建立連線。
+
+
+P20.
+
+    recv()這個function是用來接收socket上的資料，上個UDP作業recvfrom()不同的是，recv()這個function不再需要指定是從哪裡送過來的資訊。
+
+    send()這個function是用來傳送資料，它也不必指定要傳送到那個位址去。
+
+P21.
+
+    close()這個function就如字面上的意思，當操作結束後，可以使用它來釋放socket，從而停止在該socket上的任何數據操作。
+
+P22.
+    接著我們來看一些範例。
+
+P23.
+    在Client端方面:
+
+    首先，要使用socket就必須要include相關的system call及一些libary。
+    接著，我們宣告了port number和IP address。
+    再來就是宣告structure sockaddr_in和一些會用到的變數。
+    buffer就是我們要傳送的內容。
+
+P24.
+    接著來看到灰色框框，我們將socket()相關訊息填好後指定給一剛剛宣告好的變數，接著判斷sock變數回傳的值，若是成功，則回傳1，失敗則回傳-1。
+
+    再來看到藍色框框，使用bzero()將宣告的結構體初始化，並且將必要的訊息賦予相對應的結構變數內。
+
+    之後來看綠色框框，我們使用sendto()這個函數將我們的資料傳送到指定的Server端去，最後檢查傳回來的數值，若是-1，則代表沒有傳送成功。
+
+    最後，要記得釋放socket。
+
+P25.
+    接下來是Server端的部分:
+
+    黃色框框跟Client端一樣都是要先include需要用到的library，然後指定一個port number。
+
+    剩下的變數宣告就跟Client端是一樣的。
+
+    藍色框框也是相同的，一樣要給Server端基本的Socket資訊
+
+P26.
+    黃色這個框框裡面基本上都相同，唯一不同的是在address這裡，我們使用INADDR_ANY，它代表的是地址為0.0.0.0的地址,這個地址事實上表示「不確定地址」或「所有地址」、「任意地址」。
+
+    假如，一台Server上有三個IP
+    192.168.1.1
+    202.202.202.202
+    61.1.2.3
+
+    如果使用serv.sin_addr.s_addr=inet_addr("192.168.1.1"); 並且監聽port3000
+
+    這時其他電腦只有connect 192.168.1.1:3000才會成功
+    connect 202.202.202.202:3000 及 connect 61.1.2.3:3000會失敗
+
+    所以如果使用serv.sin_addr.s_addr=INADDR_ANY; ，則無論哪一個IP都可以連上。
+
+    而且這樣做也方便日後的轉移，若我們直接寫死IP Address，則當換了一個Address時都必須來修改。
+
+
+    接著，使用bind()將所建立的socket連接到指定的網路介面和明確的表示所接受的port number。並且判斷它回傳的值，若是-1則代表失敗。
+
+    最後，使用一個loop搭配recvfrom()來接收從別的電腦傳送過來的資料。
+
+P23.
+    接下來，就是說明這次作業的要求。
+
+P24.
+    這次的作業內容就是要使用socket傳送UDP封包並且計算throughput。
+    要寫一個程式從client端重複的傳送UDP封包到server端。
+
+P25.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

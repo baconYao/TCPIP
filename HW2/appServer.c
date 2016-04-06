@@ -34,7 +34,7 @@ int main(int argc, char *argv[]){
   }
 
   while(1){
-    if((recfd = accept(sock, (struct sockaddr *)&server_addr, server_addr_length)) == -1){
+    if((recfd = accept(sock, (struct sockaddr *)&client_addr, server_addr_length)) == -1){
       printf("accept failed!\n");
       close(sock);
     }
@@ -42,8 +42,8 @@ int main(int argc, char *argv[]){
     byte_recv = recv(recfd, buffer, sizeof(buffer), 0);
     if(byte_recv < 0){
       printf("Error recving packet\n");
-      printf("data: %s\n",buffer);
     }
+    printf("data: %s\n",buffer);
   }
 
   return 0;
