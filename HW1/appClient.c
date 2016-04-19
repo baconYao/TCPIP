@@ -39,7 +39,7 @@ int main(int argc, char *argv[]){
   float timeUse = 0;
   int sock,byte_sent,address_length = sizeof(address);
   // 欲傳送的內容
-  char buffer[6] = "hello\0";
+  char buffer[13] = "hello\0";
   // printf("%d\n",sizeof(buffer) );
   // 送資料的數量
   int dataCount = 0;

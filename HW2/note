@@ -1,5 +1,5 @@
 p1.
-    各位同學好，今天要出第次作業，題目是「Socket Programming With UDP」
+    各位同學好，今天要出第二次作業，題目是「Socket Programming With TCP」
 
 
 p2.
@@ -16,7 +16,7 @@ P4.
     Socket是一個介於應用層與TCP/IP協議通信的中間軟體抽象層,它是一組介面。它把複雜的TCP/IP協議隱藏在Socket介面之後,對使用者來說，只要使用者使用這組介面，讓Socket去組織數據，以符合指定的協議。
 
 P5.
-    接下來是介紹Socket的類型，在圖中有四種類型，今天要介紹的是STREAM這個類型，其他的類型會在之後的作業中講解。STREAM這個類型就是代表要使用TCP的方式來實作，那TCP是「連線型傳輸協定」。具有「資料確認與重送」、「流量控制」等特性。
+    今天要介紹的是STREAM這個類型。STREAM這個類型就是代表要使用TCP的方式來實作，那TCP是「連線型傳輸協定」。具有「資料確認與重送」、「流量控制」等特性。
 
 P6.
     接著，介紹Socket API的部分
@@ -114,7 +114,7 @@ P18.
 
 P19.
 
-    accept()這個function是由server端使用，其功用是將前頁投影片裡的「已完成連線」的queue內的socket傳到使用者的應用程式。
+    accept()這個function是由server端使用，其功用是將前頁投影片裡的「已完成連線」的queue內的socket傳到使用者的應用程式，此外，若accept成功後，會回傳一個由kernel自動產生的全新的控制符，它指向了連線的client。
 
     connect()這個function是由client端使用，其功用是透過3-way-handshake與server建立連線。
 
