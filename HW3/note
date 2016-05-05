@@ -1,0 +1,86 @@
+p1.
+    各位同學好，今天要出第三次作業，題目是「Packet Capture and Analyze」
+
+
+p2.
+    這是Outline，首先來看一下第一個Raw Socket
+
+P3.
+    現在有用來捕捉及分析封包的工具，像是IP Sniffer 或是 Library Pcap。
+
+    但是在這次的作業裡，必須直接使用OS的services。
+    
+    首先，我們要使用ioctl這個function來去改變NIC的旗標。 (NIC就是網路介面卡 Network interface controller)，白話一點的意思就是去捕捉經過網卡的封包。
+    
+    再來，使用Raw Socket去捕捉Data Link Layer和Network Layer的資訊。意思就是分析已經被捕捉來的封包。
+
+P4.
+    大部分情況下，socket都是被用來建立一個依據某種傳輸協定，例如，使用TCP或是UDP協定而做成的應用程式。
+
+    raw socket的作用主要在三個方面:
+    
+        1.透過raw socket來接受發向本機的ICMP、IGMP的protocal packets,或者用来發送這些protocal packets
+            平常想知道網路是否通順，會用ping這個指令，而ping這個指令使用的是ICMP協議。因此無法透過建立SOCK_STREAM或SOCK_DGRAM來發送這個封包，只能夠自己建構ICMP封包來發送。
+
+        2.接受發向本機但TCP/IP無力處理的封包
+            OS在實現網路部分通常只實現幾種協議，例如:TCP、UDP、ICMP等，但像是OSPF、GGP等協議，OS都沒有實現。
+        若要建構OSPF、GGP等協議的應用的話，就必須透過Raw Socket來建構。
+
+        3.用來發送一些自己制定來源地址特殊作用的封包(自己寫封包頭)
+            例如想對某台機器發出Denial of services(阻斷式攻擊)，但是又不想讓別人知道封包來源，就可以用Raw socket來發送這些偽造的封包。
+
+
+    使用raw socket，收到的封包不會被更改??
+
+    raw socket有些限制:
+        1.沒有port number。Port number的概念是在TCP、UDP才有，而在第三層的IP是沒有Port number的。所以系統會發送raw packets給適合的raw socket
+        2.在linux系統中，只有擁有root權限的使用者才能使用raw socket
+
+P13.
+    ioctl的全名是I/O Control，是一個system call，主要是對特別的檔案做底層的操作。
+
+    第一個參數fd就是要被referenced的檔案
+
+    第二個參數因為有許多value，所以下面有一張表列出了一些參考，其中我們要使用的是SIOCGIFFLAGS，他是用來設置interface的flags
+
+    第三個參數總是指標的型態，它會根據第二個參數選擇而有不同的類型。
+
+P14.
+    這是剛剛第三個參數的strtuct內容，紅色的字就是會依照第二個參數而決定的value。
+
+P15.
+    參考:http://chunchaichang.blogspot.tw/2011_11_10_archive.html
+    
+    IFF_PROMISC是將網卡設為promiscuous mode(混雜模式)
+    在網卡的預設下，會設定為nonpromiscuous，也就是說網卡只會接收到MAC碼是自己MAC碼的封包、或者是broadcast、multicast的封包。
+    所以當我們將網卡設為promiscuous mode時，我們就可以接收到實體網路上的所有封包了。
+
+P17.
+    在第三次作業裡，要使用raw socket去獲得Layer2&3的資訊並且分析被捕捉到的封包。
+    分為三個小作業
+
+
+P18.
+    接下來看到流程圖，首先是Setup interface，在這裡有宣告ifreq這個structure和一個用來放置封包的buffer
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
