@@ -39,7 +39,7 @@ int main(int argc, char *argv[]){
   float timeUse = 0;
   int sock,byte_sent,address_length = sizeof(address);
   // 欲傳送的內容
-  char buffer[13] = "hello\0";
+  char buffer[6] = "hello\0";
   // printf("%d\n",sizeof(buffer) );
   // 送資料的數量
   int dataCount = 0;
@@ -49,9 +49,9 @@ int main(int argc, char *argv[]){
   // 建立socket
   sock = socket(PF_INET,SOCK_DGRAM,0);
   if(sock < 0) {
-      printf("Error creating socket\n");
-      close(sock);
-      exit(1);
+    printf("Error creating socket\n");
+    close(sock);
+    exit(1);
   }
 
   // 填寫sockaddr_in
@@ -67,16 +67,16 @@ int main(int argc, char *argv[]){
   // 開始計時
   gettimeofday(&start,NULL);
   do{
-      // sendto() 用来將數據由指定的socket傳給對方主機
-      byte_sent = sendto(sock, buffer, sizeof(buffer), 0, (struct sockaddr*)&address, address_length);
-      dataCount++;
-      gettimeofday(&end,NULL);
-      // 傳送不成功
-      if(byte_sent < 0) {
-          printf("Error sending packet\n");
-      }
-      
-      timeUse = (end.tv_sec-start.tv_sec)+(end.tv_usec-start.tv_usec);//微秒
+    // sendto() 用来將數據由指定的socket傳給對方主機
+    byte_sent = sendto(sock, buffer, sizeof(buffer), 0, (struct sockaddr*)&address, address_length);
+    dataCount++;
+    gettimeofday(&end,NULL);
+    // 傳送不成功
+    if(byte_sent < 0) {
+      printf("Error sending packet\n");
+    }
+    
+    timeUse = (end.tv_sec-start.tv_sec)+(end.tv_usec-start.tv_usec);//微秒
   }while(timeUse < 3000);   //執行0.001秒
 
   // 結束訊息
