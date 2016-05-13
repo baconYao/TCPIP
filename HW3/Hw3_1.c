@@ -64,14 +64,71 @@ int main(int argc,char *argv[])
     }
 
     //Use ifconfig system call
-    system("ifconfig");
+    // system("ifconfig");
 
     // capture 100 packets
     for(i = 0; i < 100; i++)
     {
         //  return the length of the message written to the buffer
         recv = recvfrom(sock, (char *)buffer, sizeof(buffer), 0, (struct *sockaddr)&addr, &len);
+        ptemp = buffer;
+        //ethernet header
+        peth = (struct ether_header *)ptemp;    
+        switch(ntohs(peth->ether_type))
+        {
+            // IP packets
+            case 0X0800:
+                IP_counter++;
+                break;
+            // ARP packets
+            case 0X0806:
+                ARP_counter++;
+                break;
+            // RARP packets
+            case 0X8035:
+                RARP_counter++;
+                break;
+        }
+        // Move potiner to 「Data and Padding」
+        ptemp += sizeof(ether_header);  
+        // ip header
+        pip = (struct iphdr *)ptemp;
+        switch(pip->protocal)
+        {
+            // TCP
+            case IPPROTO_TCP:
+                TCP_counter++;
+                break;
+            // UDP
+            case TPPROTO_UDP:
+                UDP_counter++;
+                break;
+            // ICMP
+            case IPPROTO_ICMP:
+                ICMP_counter++;
+                break;
+            // IGMP
+            case IPPROTO_IGMP:
+                IGMP_counter++;
+                break;
+        }
     }
+
+    // Access NIC's flags
+    if(ioctl(sock, SIOCGIFFLAGS,&ethreq) == -1)
+    {
+        perror("ioctl SIOCGIFFLAGS");
+        exit(1);
+    }
+
+    //Set interface in unpromiscuous mode
+    ethreq.ifr_flags &=~IFF_PROMISC;
+    if(ioctl(sock, SIOCSIFFLAGS, &ethreq) == -1)
+    {
+        perror("ioctl SIOCSIFFLAGS");
+        exit(1);
+    }
+
 
     printf("===============\n");
     printf("IP\t:%d\n", IP_counter);

@@ -30,7 +30,8 @@ P4.
             例如想對某台機器發出Denial of services(阻斷式攻擊)，但是又不想讓別人知道封包來源，就可以用Raw socket來發送這些偽造的封包。
 
 
-    使用raw socket，收到的封包不會被更改??
+    使用raw socket，收到的封包不會被更改
+        意思就是使用TCP、UDP等socket時，OS會把封包的header丟棄。若使用Raw Socket則可以保留完整的封包資訊。
 
     raw socket有些限制:
         1.沒有port number。Port number的概念是在TCP、UDP才有，而在第三層的IP是沒有Port number的。所以系統會發送raw packets給適合的raw socket
