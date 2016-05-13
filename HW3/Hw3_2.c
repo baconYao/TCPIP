@@ -3,6 +3,8 @@
 #include <string.h>
 #include <net/if.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <netinet/udp.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -10,6 +12,8 @@
 #include <linux/ip.h>
 #include <unistd.h>
 #include <net/ethernet.h>
+#include <arpa/inet.h>
+
 
 //Used to sotre reveive packet's content
 char buffer[40960];
@@ -19,6 +23,8 @@ int main(int argc,char *argv[])
     struct sockaddr_in addr;
     struct ether_header *peth;
     struct iphdr *pip;
+    struct tcphdr *ptcp;
+    struct udphdr *pudp;
     
     int sock;
     int len = sizeof(addr);
@@ -63,7 +69,7 @@ int main(int argc,char *argv[])
     system("ifconfig");
 
     // capture 100 packets
-    for(i = 0; i < 100; i++)
+    while(UDP_counter < 10)
     {
         //  return the length of the message written to the buffer
         recv = recvfrom(sock, (char *)buffer, sizeof(buffer), 0, (struct sockaddr *)&addr, &len);
@@ -85,7 +91,7 @@ int main(int argc,char *argv[])
                 RARP_counter++;
                 break;
         }
-        // Move potiner to 「Data and Padding」 size = 14 bytes
+        // Move potiner to 「Data and Padding」
         ptemp += sizeof(struct ether_header);  
         // ip header
         pip = (struct ip *)ptemp;
@@ -97,7 +103,15 @@ int main(int argc,char *argv[])
                 break;
             // UDP
             case IPPROTO_UDP:
-                UDP_counter++;
+                pudp = (struct udphdr *)ptemp;
+                //printf("UDP pkt:\n to %s\n", inet_ntoa(*(struct in_addr *)&(pip->daddr)));
+                // Destination address belongs me
+                if(strcmp(inet_ntoa(*(struct in_addr *)&(pip->daddr)), "10.0.2.15") == 0)
+                {
+                    printf("UDP pkt:\n from %s ",inet_ntoa(*(struct in_addr *)&(pip->saddr)));
+                    printf("to %s\n", inet_ntoa(*(struct in_addr *)&(pip->daddr)));
+                    UDP_counter++;
+                }
                 break;
             // ICMP
             case IPPROTO_ICMP:
@@ -109,7 +123,6 @@ int main(int argc,char *argv[])
                 break;
         }
     }
-
     // Use NIC
     strncpy (ethreq.ifr_name, "eth0", 5);
 
@@ -127,17 +140,6 @@ int main(int argc,char *argv[])
         perror("ioctl SIOCSIFFLAGS");
         exit(1);
     }
-
-
-    printf("===============\n");
-    printf("IP\t:%d\n", IP_counter);
-    printf("ARP\t:%d\n", ARP_counter);
-    printf("RARP\t:%d\n", RARP_counter);
-    printf("TCP\t:%d\n", TCP_counter);
-    printf("UDP\t:%d\n", UDP_counter);
-    printf("ICMP\t:%d\n", ICMP_counter);
-    printf("IGMP\t:%d\n", IGMP_counter);
-    printf("===============\n");
 
 
     return 0;
