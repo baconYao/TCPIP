@@ -147,7 +147,13 @@ int main(int argc, char *argv[])
       printf("Previous RTT:%d\n",rtt);
       printf("----------------------\n");
       
+<<<<<<< HEAD
       int recv;
+=======
+      // recvfrom(sock, buffer,sizeof(buffer), 0, (struct sockaddr*)&address, &address_length);
+      int recv;
+      int address_length = sizeof(to);
+>>>>>>> b6a8d6d52358c329c1b16ec314e44dda4fa50ba8
       
       recv = recvfrom(sock, buffer,sizeof(buffer), 0, NULL, NULL);       //接收封包
       if(recv < 0)

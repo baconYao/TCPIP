@@ -22,7 +22,12 @@ int to_len = sizeof(to);
 int main(int argc, char *argv[])
 {
     int sock;
+<<<<<<< HEAD
     int seqnum = 0;           //SEQ Number從0開始
+=======
+    struct sockaddr_in to;
+    int to_len = sizeof(to);
+>>>>>>> b6a8d6d52358c329c1b16ec314e44dda4fa50ba8
     char buffer[65536];
     struct timeval start_time,next_time,back_time;
     int rtt=0;
@@ -30,6 +35,7 @@ int main(int argc, char *argv[])
     struct icmp *icmp;
     struct ip *ip = (struct ip *)buffer;
 
+<<<<<<< HEAD
     //Use ICMP packet
     sock(PF_INET,SOCK_RAW,1);
     if(sock == -1)
@@ -43,6 +49,12 @@ int main(int argc, char *argv[])
     {
         exit(1);
     }
+=======
+
+    sock(PF_INET,SOCK_RAW,1);
+
+
+>>>>>>> b6a8d6d52358c329c1b16ec314e44dda4fa50ba8
 
     printf("Pining %s\n\n", argv[1]);
     //將Buffer初始化
