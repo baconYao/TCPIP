@@ -3,9 +3,9 @@
 #include <string.h>  // for bzero
 #include <unistd.h>  // for close()
 #include <sys/types.h>  
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#include <sys/socket.h>   //for recvfrom() & sendto()
+#include <netinet/in.h>   //for sockaddr_in
+// #include <arpa/inet.h>
 
 #define PortNumber 3000
 
