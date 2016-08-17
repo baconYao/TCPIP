@@ -11,7 +11,11 @@
 #include <unistd.h>
 #include <netdb.h>          //for gethostbyname()
 
+<<<<<<< HEAD
 int getIp(char *);        //取得目的端的IP address
+=======
+int getIp(void);        //取得目的端的IP address
+>>>>>>> f58b47d6a8853efa9e79d8ed47ebe49945c0b35d
 unsigned short cksum(unsigned short *, int);    //計算CHECKSUM
 int rtt_c(int,int,int,int);     //計算ROUND TRIP TIME
 
@@ -22,6 +26,7 @@ int to_len = sizeof(to);
 int main(int argc, char *argv[])
 {
     int sock;
+<<<<<<< HEAD
     int seqnum = 0;           //SEQ Number從0開始
     char buffer[65536];
     struct timeval start_time,next_time,back_time;
@@ -33,6 +38,24 @@ int main(int argc, char *argv[])
 
     //Use ICMP packet
     sock = socket(PF_INET,SOCK_RAW,1);
+=======
+<<<<<<< HEAD
+    int seqnum = 0;           //SEQ Number從0開始
+=======
+    struct sockaddr_in to;
+    int to_len = sizeof(to);
+>>>>>>> b6a8d6d52358c329c1b16ec314e44dda4fa50ba8
+    char buffer[65536];
+    struct timeval start_time,next_time,back_time;
+    int rtt=0;
+    int s_time = 0, n_time = 0;
+    struct icmp *icmp;
+    struct ip *ip = (struct ip *)buffer;
+
+<<<<<<< HEAD
+    //Use ICMP packet
+    sock(PF_INET,SOCK_RAW,1);
+>>>>>>> f58b47d6a8853efa9e79d8ed47ebe49945c0b35d
     if(sock == -1)
     {
         perror("Socket can't creat!\n");
@@ -40,11 +63,31 @@ int main(int argc, char *argv[])
     }
 
     // 取得Address
+<<<<<<< HEAD
     if(getIp(*argv) == 0)
     {
         printf("Can't get host.");
         exit(1);
     }
+=======
+    if(getIp() == 0)
+    {
+        exit(1);
+    }
+=======
+
+    sock(PF_INET,SOCK_RAW,1);
+
+
+>>>>>>> b6a8d6d52358c329c1b16ec314e44dda4fa50ba8
+
+    printf("Pining %s\n\n", argv[1]);
+    //將Buffer初始化
+    bzero(buffer,buffersize + 16);
+    //轉為ICMP格式
+    icmp = (struct icmp *)buffer;
+    
+>>>>>>> f58b47d6a8853efa9e79d8ed47ebe49945c0b35d
 
     printf("Pining %s\n\n", argv[1]);
     //將Buffer初始化
@@ -112,19 +155,30 @@ int main(int argc, char *argv[])
 
     printf("End of Ping to %s\n",hostip);
 
+    
+
     return 0;
 }
 
 
+<<<<<<< HEAD
 int getIp(char *argv)
+=======
+int getIp()
+>>>>>>> f58b47d6a8853efa9e79d8ed47ebe49945c0b35d
 {
     char *hostname;
     struct in_addr taraddr;
     struct hostent *hp;
     int j;
 
+<<<<<<< HEAD
     //查詢hostname的地址
     hp = gethostbyname(*(argv + 1));           
+=======
+
+    hp = gethostbyname(argv[1]);           //查詢hostname的地址
+>>>>>>> f58b47d6a8853efa9e79d8ed47ebe49945c0b35d
     if(hp) {
        hostname = hp->h_name;
        to.sin_family = hp->h_addrtype;

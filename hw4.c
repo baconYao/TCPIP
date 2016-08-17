@@ -42,7 +42,11 @@ int main(int argc, char *argv[])
    int rtt=0;
    char *hostip;
    int i, j;
+<<<<<<< HEAD
    // char *pbuffer;
+=======
+   char *pbuffer;
+>>>>>>> f58b47d6a8853efa9e79d8ed47ebe49945c0b35d
 
    if(argc < 2) {            //輸入格式錯誤
       printf("Format:sudo ./pingHW IP_Address\n");
@@ -147,7 +151,17 @@ int main(int argc, char *argv[])
       printf("Previous RTT:%d\n",rtt);
       printf("----------------------\n");
       
+<<<<<<< HEAD
       int recv;
+=======
+<<<<<<< HEAD
+      int recv;
+=======
+      // recvfrom(sock, buffer,sizeof(buffer), 0, (struct sockaddr*)&address, &address_length);
+      int recv;
+      int address_length = sizeof(to);
+>>>>>>> b6a8d6d52358c329c1b16ec314e44dda4fa50ba8
+>>>>>>> f58b47d6a8853efa9e79d8ed47ebe49945c0b35d
       
       recv = recvfrom(sock, buffer,sizeof(buffer), 0, NULL, NULL);       //接收封包
       if(recv < 0)
@@ -176,7 +190,11 @@ int main(int argc, char *argv[])
       printf("RTT:%d\n\n",rtt);
       printf("======================\n\n");     
 
+<<<<<<< HEAD
       // sleep(1);        //一秒送一次
+=======
+      sleep(1);        //一秒送一次
+>>>>>>> f58b47d6a8853efa9e79d8ed47ebe49945c0b35d
    // }
    
 printf("End of Ping to %s\n",hostip);
