@@ -10,7 +10,7 @@
 
 
 #define Server_PortNumber 3000
-#define Server_Address "127.0.0.1"
+#define Server_Address "140.120.15.251"
 
 /* 
     count:送了幾筆資料

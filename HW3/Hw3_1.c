@@ -69,7 +69,7 @@ int main(int argc,char *argv[])
         recv = recvfrom(sock, (char *)buffer, sizeof(buffer), 0, (struct sockaddr *)&addr, &len);
         ptemp = buffer;
         //ethernet header
-        peth = (struct ether_header *)ptemp;    
+        peth = (struct ether_header *)ptemp;    //將收到的ptemp轉為ether_header格式 (6+6+2 = 14 Bytes長)
         switch(ntohs(peth->ether_type))
         {
             // IP packets

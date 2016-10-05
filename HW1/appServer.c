@@ -7,7 +7,7 @@
 #include <netinet/in.h>   //for sockaddr_in
 // #include <arpa/inet.h>
 
-#define PortNumber 3000
+#define PortNumber 5555
 
 float calculate (int count,int  size,float timeUse){
   float result;
@@ -35,7 +35,7 @@ int main(int argc, char *argv[]){
   int timeSwitch = 1;
   // 配置記憶體
   // char *buffer = malloc(bufferSize * sizeof(char));
-  char buffer[50];
+  char buffer[65535];
   char overSignal[10] = "Complete!";
     
 
@@ -87,6 +87,8 @@ int main(int argc, char *argv[]){
     else{
       printf("Datagram %d : %s\n",datagramCount,buffer);
       datagramCount++;
+      printf("R\n");
+      
     }
   }
 
