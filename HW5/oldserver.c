@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
             for(i = 0; i < 10; i++)
             {
                 byte_recv = recv(recfd, &buffer, sizeof(buffer), 0);
-                printf("Recv bytes: %d\n", byte_recv);
+                // printf("Recv bytes: %d\n", byte_recv);
                 if(byte_recv < 0)
                 {
                     printf("ERROR recving packet\n");
