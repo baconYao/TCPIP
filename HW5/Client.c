@@ -18,10 +18,9 @@ int main(int argc, char *argv[]) {
        byte_sent, 
        server_addr_length = sizeof(server_addr), 
        count=0;
-
-   char *buffer = "hello";
-   // printf("\nstrlent: %d ", strlen(buffer));         //length = 5 , not include \0
-   // printf(" sizeof: %d\n", sizeof(buffer));          //length = 8
+   char buffer[100] = "hello\0";
+   printf("\nstrlent: %d ", strlen(buffer));         //length = 5 , not include \0
+   printf(" sizeof: %d\n", sizeof(buffer));          //length = 100
 
    if (argc < 3) {
       fprintf(stderr, "Usage: %s ip port\n", argv[0]);
@@ -41,11 +40,11 @@ int main(int argc, char *argv[]) {
 
    if (connect(sock, (struct sockaddr *)&server_addr,server_addr_length)==-1) 
    {
-      printf("connect failed!");
+      printf("connect failed!\n");
       exit(1);
    }
 
-   byte_sent = send(sock, "Begin!123", sizeof("Begin"), 0);          //sizeof("Begin") == 6 Bytes, include \0
+   byte_sent = send(sock, "Begin\0", sizeof("Begin"), 0);          //sizeof("Begin") == 6 Bytes, include \0
    if (byte_sent < 0)
    {
       printf("Error sending start packet\n");
@@ -70,7 +69,7 @@ int main(int argc, char *argv[]) {
       }
    }
 
-   byte_sent = send(sock, "exit", sizeof("exit"), 0);                //sizeof("exit") == 5 Bytes, include \0
+   byte_sent = send(sock, "exit\0", sizeof("exit"), 0);                //sizeof("exit") == 5 Bytes, include \0
    if (byte_sent < 0)
    {
       printf("Error sending exit packet\n");
