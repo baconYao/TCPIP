@@ -1,3 +1,9 @@
+/*******************************************************/
+/* File  : Server_Thread.c                             */
+/* Usage : ./s.out                                     */
+/* Compile: gcc Server_Thread -o s.out -pthread        */
+/*******************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>     //for bzero()
@@ -15,93 +21,32 @@
 #define RESET "\x1b[0;m"
 
 #define PortNumber 5555
-#define BUFFER_SIZE 100
-#define NUM_THREADS 20
+#define BUFFER_SIZE 512
+#define MAXMEM 10
+#define NAMELEN 20
 
-char buffer[BUFFER_SIZE];
-char *bufferPtr = buffer;
-int count;
-int clientNumber = 1;// Be used to calculate client number.It'll be add one while client connect successfully
+// char buffer[BUFFER_SIZE];
+// char *bufferPtr = buffer;
+int clientSd[MAXMEM];
+int sock;
+int clientNumber = 0;// Be used to calculate client number.It'll be add one while client connect successfully
 
-// 傳遞多個參數給thread handler  參考:http://pccts.blogspot.tw/2007/11/pthreadcreate.html
-struct threadArg 
-{
-    int clientSd;
-    int sock;
-};
-
-
-void *threadSend(void *arg)
-{
-    int byte_sent;
-    struct threadArg *tArg = (struct threadArg *)arg;
-    // show client who join the chat room
-    printf(RED_BOLD"----------------------------------------------\n");
-    printf("Client: %d Client ID: %lu join!\n",clientNumber, pthread_self());
-    printf("clientSd: %d , Sock: %d \n",tArg->clientSd, tArg->sock);
-    // show client's Recv function is OK
-    printf("Send thread is ready!\n"RESET);
-    // byte_sent = send(tArg->sock, "hello\0", sizeof("hello"), 0);    //sizeof("exit") == 5 Bytes, include \0
-    // if (byte_sent < 0)
-    // {
-    //     printf("Error sending exit packet\n");
-    // }
-
-    // first join need to send message to every message which is connected before.
-
-
-    // int dataNumber = 1;
-    // while( (byte_recv = recv(clientSd, bufferPtr, sizeof *bufferPtr, 0)) > 0)
-    // {
-    //     printf("%c", *bufferPtr);
-    //     if(*bufferPtr == '\0')
-    //     {
-    //         printf("\nData[%d]: ",dataNumber);
-    //         dataNumber++;
-    //     }
-    //     bufferPtr += byte_recv;
-    // }
-    pthread_exit(NULL);
-}
-
-void *threadRecv(void *arg)
-{
-    // show client's Recv function is OK
-    printf(RED_BOLD"Recv thread is ready!\n\n"RESET);
-    struct threadArg *tArg = (struct threadArg *)arg;
-    int byte_recv;
-    clientNumber++;
-
-    int dataNumber = 1;
-    while( (byte_recv = recv(tArg->clientSd, bufferPtr, sizeof *bufferPtr, 0)) > 0)
-    {
-        printf("%c", *bufferPtr);
-        if(*bufferPtr == '\0')
-        {
-            printf("\nData[%d]: ",dataNumber);
-            dataNumber++;
-        }
-        bufferPtr += byte_recv;
-    }
-    pthread_exit(NULL);
-}
+void *quit();
+void *rcv_snd(void *arg);
 
 
 int main(int argc, char *argv[])
 {
     struct sockaddr_in server_addr, client_addr;
-    int sock, 
-        byte_recv, 
-        clientSd,
-        server_addr_length = sizeof(server_addr), 
-        client_addr_length = sizeof(client_addr);
-    
+    int server_addr_length = sizeof(server_addr), client_addr_length = sizeof(client_addr);
+    pthread_t closeThread;      //用來關閉server的thread
 
     sock = socket(PF_INET, SOCK_STREAM, 0);
     if(sock < 0)
     {
         printf("Error creating socket\n");
     }
+    printf(RED_BOLD"Socket creat successfully\n");
 
     bzero(&server_addr, server_addr_length);
     server_addr.sin_family = AF_INET;
@@ -113,48 +58,54 @@ int main(int argc, char *argv[])
         printf("error binding!\n");
         close(sock);
     }
+    printf("Bind successfully\n");
 
     if(listen(sock, 20) == -1)
     {
         printf("listen failed!\n");
         close(sock);
     }
+    printf("Listne successfully\n");
 
-    // create threads array
-    pthread_t threads[NUM_THREADS];
-    int pthreadNumber = 0;
+    // 建立用來管理Server的thread
+    pthread_create(&closeThread, NULL, quit, NULL);
+
+    printf("You can type 「quit」 to close server!\n\n"RESET);
+
+
+    //記錄空閒的客户端的套接字描述符（-1為空閒）
+    int i = 0;
+    for(i = 0; i < MAXMEM; i++)
+    {
+        clientSd[i]=-1;
+    }
+
     while(1)
     {
-        if((clientSd = accept(sock, (struct sockaddr *)&client_addr, &client_addr_length)) == -1)
+        for(i = 0; i < MAXMEM; i++)
+        {
+            if(clientSd[i] == -1)
+            {
+                break;
+            }
+        }
+        if((clientSd[i] = accept(sock, (struct sockaddr *)&client_addr, &client_addr_length)) == -1)
         {
             printf("accept failed!\n");
             close(sock);
         }
         else 
         {
-            // create two thread to service client, one thread for Send the other for Recv.
+            clientNumber++;
+            printf(YEL_BOLD"client %d (Port: %d) connect!\n"RESET, clientNumber, ntohs(client_addr.sin_port));
+            
             int rc;
-            
-            // 傳遞多個的參數
-            struct threadArg arg;
-            arg.clientSd = clientSd;
-            arg.sock = sock;
-            
-            // Send thread
-            rc = pthread_create(&threads[pthreadNumber], NULL, threadSend, (void *)&arg);
+            // rcv_snd thread
+            rc = pthread_create(malloc(sizeof(pthread_t)), NULL, rcv_snd, (void *)i);
             if (rc){
                printf("ERROR; return code from pthread_create() is %d\n", rc);
                exit(-1);
             }
-            pthreadNumber++;
-            sleep(1);
-            // Recv thread
-            rc = pthread_create(&threads[pthreadNumber], NULL, threadRecv, (void *)&arg);
-            if (rc){
-               printf("ERROR; return code from pthread_create() is %d\n", rc);
-               exit(-1);
-            }
-            pthreadNumber++;
         }
         
     }
@@ -162,3 +113,86 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
+// 管理server的thread
+void *quit()
+{
+    char msg[10];
+    while(1)
+    {
+        scanf("%s",msg);
+        if(strcmp("quit",msg)==0)
+        {
+            printf("Server close\n");
+            close(sock);
+            exit(0);
+        }
+    }
+}
+
+// 收送的thread
+void *rcv_snd(void *arg)
+{
+    // struct threadArg *tArg = (struct threadArg *)arg;
+    char* askClientName="Your name please：";
+    char buff[BUFFER_SIZE];
+    char recvBuff[BUFFER_SIZE];
+    // char buff2[BUFFER_SIZE];
+    char name[NAMELEN];
+    // time_t ticks;
+    int i = 0;
+    int retval;
+
+    // 獲得client的名字
+    send(clientSd[(int)arg], askClientName, strlen(askClientName)+1, 0);
+    // write(clientSd[tArg->clientSD], askClientName, strlen(askClientName)+1);
+    int len;
+    len = read(clientSd[(int)arg], name, NAMELEN);
+    if(len > 0)
+    {
+        name[len] = 0;
+    }
+
+    // 當一個client加入聊天室時，會告知其他clients
+    strcpy(buff,name);
+    strcat(buff,"\tjoin in\0");
+    for(i=0;i<MAXMEM;i++)
+    {
+        if(clientSd[i]!=-1)
+        {
+            write(clientSd[i],buff,strlen(buff));
+        }
+    }
+
+    while(1)
+    {
+        if((len = read(clientSd[(int)arg], recvBuff, BUFFER_SIZE)) > 0)
+        {
+            recvBuff[len] = 0;
+
+            //當client輸入"bye”時，此client退出聊天室
+            if(strcmp("bye", buff) == 0)
+            {
+                close(clientSd[(int)arg]);
+                clientSd[(int)arg] = -1;
+                pthread_exit(&retval);
+            }
+
+            strcpy(buff, name);
+            strcat(buff,": ");
+            //strcat(buff,buff2);
+            strcat(buff,recvBuff);
+
+            printf("%s\n", recvBuff);
+            for(i = 0; i < MAXMEM; i++)
+            {
+                 if(clientSd[i] != -1)
+                 {
+                      write(clientSd[i], buff, strlen(buff));
+                 }
+            }
+        }
+
+    }
+}
+

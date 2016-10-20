@@ -1,6 +1,7 @@
 /*******************************************************/
-/* File  : Client.c                                    */
-/* Usage : Client    server port                       */
+/* File  : Client_Thread.c                             */
+/* Usage : ./c.out server port                         */
+/* Compile: gcc Client_Thread -o c.out -pthread        */
 /*******************************************************/
  
 #include <stdio.h>
@@ -10,17 +11,28 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <pthread.h>    //for pthread()
 
+// color defines
+#define RED_BOLD "\x1b[;31;1m"
+#define BLU_BOLD "\x1b[;34;1m"
+#define YEL_BOLD "\x1b[;33;1m"
+#define GRN_BOLD "\x1b[;32;1m"
+#define CYAN_BOLD_ITALIC "\x1b[;36;1;3m"
+#define RESET "\x1b[0;m"
+
+#define BUFFER_SIZE 512
+#define NAMELEN 20
+
+int sock;
+char buffer[100];
+char input[100];
+
+void *threadSend();
 
 int main(int argc, char *argv[]) {
    struct sockaddr_in server_addr;
-   int sock, 
-       byte_sent, 
-       server_addr_length = sizeof(server_addr), 
-       count=0;
-   char buffer[100] = "hello\0";
-   printf("\nstrlent: %d ", strlen(buffer));         //length = 5 , not include \0
-   printf(" sizeof: %d\n", sizeof(buffer));          //length = 100
+   int server_addr_length = sizeof(server_addr);
 
    if (argc < 3) {
       fprintf(stderr, "Usage: %s ip port\n", argv[0]);
@@ -28,7 +40,7 @@ int main(int argc, char *argv[]) {
    }
 
    sock = socket(PF_INET, SOCK_STREAM, 0);
-   if (sock < 0)    
+   if (sock < 0)
    {
       printf("Error creating socket\n");
    }
@@ -44,48 +56,51 @@ int main(int argc, char *argv[]) {
       exit(1);
    }
 
-   byte_sent = send(sock, "Begin\0", sizeof("Begin"), 0);          //sizeof("Begin") == 6 Bytes, include \0
-   if (byte_sent < 0)
-   {
-      printf("Error sending start packet\n");
-   }
-   else
-   {
-      count++;
+   printf("You can type 「bye」 to leave chatroom!\n\n");
+
+   // create Send thread
+   pthread_t ThreadSend;
+   int rc;
+   
+   // Send thread
+   rc = pthread_create(&ThreadSend, NULL, threadSend, NULL);
+   // rc = pthread_create(&ThreadSend, NULL, threadSend, (void *)&arg);
+   if (rc){
+      printf("ERROR; return code from pthread_create() is %d\n", rc);
+      close(sock);
+      exit(-1);
    }
 
-   // send 100 messages
-   while(count < 100)
+   // 接收訊息
+   char buff[BUFFER_SIZE];
+   int len;
+
+   while(1)
    {
-      byte_sent = send(sock, buffer, strlen(buffer)+1, 0);           //strlen(buffer)+1 = [buffer message] + \0
-        
-      if (byte_sent < 0)
+      if((len = read(sock, buff, BUFFER_SIZE)) > 0)
       {
-         printf("Error sending packet\n");
-      }
-      else 
-      {
-         count ++;
+         buff[len] = 0;
+         printf("\n%s\n\n", buff);
       }
    }
-
-   byte_sent = send(sock, "exit\0", sizeof("exit"), 0);                //sizeof("exit") == 5 Bytes, include \0
-   if (byte_sent < 0)
-   {
-      printf("Error sending exit packet\n");
-   }
-   else
-   {
-      count++;
-   }
-
-   int total_size = sizeof(buffer)*8*count;
-   printf("---------------------------------------------------------------------\n");
-   printf("The number of data: %d ;Total Size: %d (bits)\n", count, total_size);
-   printf("---------------------------------------------------------------------\n");
-
-   close(sock);
 
    return 0;
    
+}
+
+void *threadSend()
+{
+    char name[NAMELEN];
+    char recvBuff[BUFFER_SIZE];
+    gets(name);
+    write(sock, name, strlen(name));
+    while(1)
+    {
+        gets(recvBuff);
+        write(sock, recvBuff, strlen(recvBuff));
+        if(strcmp("bye",recvBuff) == 0)
+        {
+            exit(0);
+        }
+    }
 }
