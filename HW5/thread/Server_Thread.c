@@ -24,11 +24,12 @@
 #define BUFFER_SIZE 512
 #define MAXMEM 10
 #define NAMELEN 20
+#define LISTENQ 5
 
 // char buffer[BUFFER_SIZE];
 // char *bufferPtr = buffer;
 int clientSd[MAXMEM];
-int sock;
+int listenfd;
 int clientNumber = 0;// Be used to calculate client number.It'll be add one while client connect successfully
 
 void *quit();
@@ -41,8 +42,8 @@ int main(int argc, char *argv[])
     int server_addr_length = sizeof(server_addr), client_addr_length = sizeof(client_addr);
     pthread_t closeThread;      //用來關閉server的thread
 
-    sock = socket(PF_INET, SOCK_STREAM, 0);
-    if(sock < 0)
+    listenfd = socket(PF_INET, SOCK_STREAM, 0);
+    if(listenfd < 0)
     {
         printf("Error creating socket\n");
     }
@@ -53,17 +54,17 @@ int main(int argc, char *argv[])
     server_addr.sin_port = htons(PortNumber);
     server_addr.sin_addr.s_addr = INADDR_ANY;
 
-    if(bind(sock, (struct sockaddr *)&server_addr, server_addr_length) == -1)
+    if(bind(listenfd, (struct sockaddr *)&server_addr, server_addr_length) == -1)
     {
         printf("error binding!\n");
-        close(sock);
+        close(listenfd);
     }
     printf("Bind successfully\n");
 
-    if(listen(sock, 20) == -1)
+    if(listen(listenfd, LISTENQ) == -1)
     {
         printf("listen failed!\n");
-        close(sock);
+        close(listenfd);
     }
     printf("Listne successfully\n");
 
@@ -77,7 +78,7 @@ int main(int argc, char *argv[])
     int i = 0;
     for(i = 0; i < MAXMEM; i++)
     {
-        clientSd[i]=-1;
+        clientSd[i] = -1;
     }
 
     while(1)
@@ -89,10 +90,10 @@ int main(int argc, char *argv[])
                 break;
             }
         }
-        if((clientSd[i] = accept(sock, (struct sockaddr *)&client_addr, &client_addr_length)) == -1)
+        if((clientSd[i] = accept(listenfd, (struct sockaddr *)&client_addr, &client_addr_length)) == -1)
         {
             printf("accept failed!\n");
-            close(sock);
+            close(listenfd);
         }
         else 
         {
@@ -124,7 +125,7 @@ void *quit()
         if(strcmp("quit",msg)==0)
         {
             printf("Server close\n");
-            close(sock);
+            close(listenfd);
             exit(0);
         }
     }
@@ -155,10 +156,10 @@ void *rcv_snd(void *arg)
 
     // 當一個client加入聊天室時，會告知其他clients
     strcpy(buff,name);
-    strcat(buff,"\tjoin in\0");
-    for(i=0;i<MAXMEM;i++)
+    strcat(buff,"\tjoin in this chatroom!\0");
+    for(i = 0; i < MAXMEM; i++)
     {
-        if(clientSd[i]!=-1)
+        if(clientSd[i] != -1)
         {
             write(clientSd[i],buff,strlen(buff));
         }

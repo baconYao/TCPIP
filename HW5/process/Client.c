@@ -1,6 +1,6 @@
 /*******************************************************/
-/* File  : Client.c                                    */
-/* Usage : Client    server port                       */
+/* File  : client_Process.c                            */
+/* Usage : ./c.out server port                         */
 /*******************************************************/
  
 #include <stdio.h>
