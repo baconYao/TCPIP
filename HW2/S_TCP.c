@@ -14,15 +14,13 @@ int main(int argc, char *argv[])
   struct sockaddr_in client_addr;
   struct timeval start;
   struct timeval end;
-  int sock,byte_recv,client_addr_length = sizeof(client_addr),recfd;
+  int byte_recv,client_addr_length = sizeof(client_addr),recfd;
   int datagramCount = 0;
-  char buffer[50];
-  char overSignal[10] = "Complete!";
-  int timeSwitch = 1;
+  char buffer[6];
   float timeUse = 0;
 
   // 建立socket
-  sock = create_socket();
+  int sock = create_socket();
   // 綁定port number
   bind_to_port(sock, atoi(argv[1]));
   
@@ -48,35 +46,29 @@ int main(int argc, char *argv[])
       {
         byte_recv = recv(recfd, buffer, sizeof(buffer), 0);
         
-        if(byte_recv > 0 && timeSwitch)
-        {
-          // 開始計時
-          gettimeofday(&start,NULL);
-          timeSwitch = 0;
-        }
-        else if(byte_recv < 0)
+        if(byte_recv < 0)
         {
           printf("Error recving packet\n");
-        }
-
-        if(strspn(buffer,overSignal))
-        {
-          printf("Client send completed!\n");
-          // 終止計時
-          gettimeofday(&end,NULL);
-          timeUse = (end.tv_sec-start.tv_sec)+(end.tv_usec-start.tv_usec);//微秒
-          printf("Throughput : %f Mbps\n", calculate_throughput(datagramCount, strlen(buffer), timeUse));
-          datagramCount = 0;
-          timeSwitch = 1;
-          printf("--------------------------------------------\n");
-          printf("\nWaiting for reveiving\n");
-          printf("--------------------------------------------\n");
-          break;
-        }
-        else
-        {
-          printf("Datagram %d : %s\n",datagramCount,buffer);
+        } else {
           datagramCount++;
+          if(strcmp(buffer, "start") == 0) {
+            gettimeofday(&start,NULL);
+          } else if(strcmp(buffer, "exit") == 0){
+            printf("Client send completed!\n");
+            // 終止計時
+            gettimeofday(&end,NULL);
+            timeUse = (end.tv_sec-start.tv_sec)+(end.tv_usec-start.tv_usec);//微秒
+            printf("Throughput : %f Mbps\n", calculate_throughput(datagramCount, strlen(buffer), timeUse));
+            datagramCount = 0;
+            printf("--------------------------------------------\n");
+            printf("\nWaiting for reveiving\n");
+            printf("--------------------------------------------\n");
+            break;
+          }
+          else
+          {
+            printf("Datagram %d : %s\n",datagramCount,buffer);
+          }
         }
       }
     }
@@ -86,4 +78,3 @@ int main(int argc, char *argv[])
   close(sock);
   return 0;
 }
-

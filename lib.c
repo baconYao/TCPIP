@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <sys/types.h>
 
 #include "lib.h"
 
@@ -141,7 +142,23 @@ int write_out(int socket, char *msg) {
 }
 
 
+int sendall(int s, char *buf, int *len)
+{
+  int total = 0; // 我們已經送出多少 bytes 的資料
+  int bytesleft = *len; // 我們還有多少資料要送
+  int n;
 
+  while(total < *len) {
+    n = send(s, buf+total, bytesleft, 0);
+    if (n == -1) { break; }
+    total += n;
+    bytesleft -= n;
+  }
+
+  *len = total; // 傳回實際上送出的資料量
+
+  return n==-1?-1:0; // 失敗時傳回 -1、成功時傳回 0
+}
 
 
 
